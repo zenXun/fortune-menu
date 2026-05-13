@@ -1,0 +1,17 @@
+{
+  "name": "买菜小助手",
+  "short_name": "买菜助手",
+  "description": "管理菜谱、自动生成购物清单、支持分享",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8f6fb",
+  "theme_color": "#a29bd9",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

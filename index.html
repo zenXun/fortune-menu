@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#a29bd9" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="买菜助手" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <title>买菜小助手</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>🛒 买菜小助手</h1>
+    <div class="selected-summary" id="selectedSummary">已选 0 道菜</div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="menu">菜谱</button>
+    <button class="tab" data-tab="cart">
+      购物车
+      <span class="badge" id="cartBadge">0</span>
+    </button>
+    <button class="tab" data-tab="add">+ 添加菜谱</button>
+  </nav>
+
+  <main>
+    <!-- 菜谱库 -->
+    <section class="panel active" id="panel-menu">
+      <div class="category-bar" id="categoryBar"></div>
+      <div class="panel-header">
+        <p class="hint">点卡片查看详情,在详情里加入今日菜单。</p>
+        <div>
+          <button class="link-btn" id="shareMenuBtn">分享菜单</button>
+          <button class="link-btn" id="clearSelected">清空已选</button>
+        </div>
+      </div>
+      <div class="recipe-grid" id="recipeGrid"></div>
+      <div class="empty" id="emptyRecipes" hidden>
+        <p>还没有菜谱,点上方 <b>+ 添加菜谱</b> 开始录入吧。</p>
+      </div>
+    </section>
+
+    <!-- 购物车 -->
+    <section class="panel" id="panel-cart">
+      <div class="panel-header">
+        <h2>今日购物清单</h2>
+        <div>
+          <button class="link-btn" id="shareCart">分享</button>
+          <button class="link-btn" id="copyCart">复制</button>
+        </div>
+      </div>
+      <div class="cart-groups" id="cartGroups"></div>
+      <div class="empty" id="emptyCart">
+        <p>购物车空空如也,先去菜谱页选几个菜吧。</p>
+      </div>
+      <div class="selected-recipes" id="selectedRecipes"></div>
+    </section>
+
+    <!-- 添加菜谱 -->
+    <section class="panel" id="panel-add">
+      <form id="recipeForm" class="recipe-form">
+        <input type="hidden" id="recipeId" />
+
+        <label class="field">
+          <span>菜名</span>
+          <input type="text" id="recipeName" required placeholder="例如:西红柿炒鸡蛋" />
+        </label>
+
+        <div class="field">
+          <span>菜品图片</span>
+          <div class="image-uploader">
+            <div class="image-preview" id="imagePreview">
+              <span class="image-placeholder">未上传</span>
+            </div>
+            <div class="image-actions">
+              <label class="btn-secondary file-label">
+                选择图片
+                <input type="file" id="recipeImageFile" accept="image/*" hidden />
+              </label>
+              <button type="button" class="link-btn" id="clearImage" hidden>移除图片</button>
+            </div>
+            <small class="hint">不上传图片时使用下方 emoji 显示</small>
+          </div>
+        </div>
+
+        <label class="field">
+          <span>Emoji 图标(没图片时显示)</span>
+          <input type="text" id="recipeEmoji" maxlength="4" placeholder="例如:🍅 或 蛋" />
+        </label>
+
+        <div class="field">
+          <span>分类</span>
+          <div class="category-select-row">
+            <select id="recipeCategory"></select>
+            <button type="button" class="link-btn" id="addCategoryBtn">+ 新分类</button>
+          </div>
+        </div>
+
+        <div class="ingredients-section">
+          <div class="field-header">
+            <span>食材清单</span>
+            <button type="button" class="link-btn" id="addIngredient">+ 添加食材</button>
+          </div>
+          <div id="ingredientList" class="ingredient-list"></div>
+        </div>
+
+        <label class="field">
+          <span>做法备注(可选)</span>
+          <textarea id="recipeNotes" rows="5" placeholder="写下简单做法、关键步骤、火候提醒……"></textarea>
+        </label>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="cancelEdit" hidden>取消编辑</button>
+          <button type="submit" class="btn-primary" id="saveRecipe">保存菜谱</button>
+        </div>
+      </form>
+
+      <hr class="divider" />
+
+      <div class="manage-section">
+        <h3>分类管理</h3>
+        <ul class="category-manage-list" id="categoryManageList"></ul>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="manage-section">
+        <h3>已有菜谱(可编辑/删除)</h3>
+        <ul class="manage-list" id="manageList"></ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- 详情弹层 -->
+  <div class="modal-overlay" id="detailModal" hidden>
+    <div class="modal-sheet" id="detailSheet">
+      <div class="modal-handle"></div>
+      <button class="modal-close" id="detailClose" aria-label="关闭">×</button>
+
+      <div class="detail-cover" id="detailCover"></div>
+
+      <div class="detail-header">
+        <div class="detail-title">
+          <h2 id="detailName">菜名</h2>
+          <div class="detail-meta">
+            <span class="detail-category" id="detailCategory"></span>
+            <span class="cook-stepper" id="cookStepper">
+              <button type="button" class="cook-step-btn" id="cookMinus" aria-label="减一次">−</button>
+              <span class="cook-step-label" id="detailCookCount">做过 0 次</span>
+              <button type="button" class="cook-step-btn" id="cookPlus" aria-label="加一次">+</button>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>食材</h3>
+        <ul class="detail-ingredients" id="detailIngredients"></ul>
+      </div>
+
+      <div class="detail-section">
+        <h3>做法备注</h3>
+        <div class="detail-notes" id="detailNotes"></div>
+      </div>
+
+      <div class="detail-actions">
+        <button class="btn-secondary" id="detailEdit">编辑</button>
+        <button class="btn-primary" id="detailToggle">加入今日菜单</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 分享弹层 -->
+  <div class="modal-overlay" id="shareModal" hidden>
+    <div class="modal-sheet share-sheet">
+      <div class="modal-handle"></div>
+      <button class="modal-close" id="shareClose" aria-label="关闭">×</button>
+      <h2>📤 分享</h2>
+      <div class="share-mode-tabs" id="shareModeTabs">
+        <button class="share-mode-tab active" data-mode="full">菜单 + 清单</button>
+        <button class="share-mode-tab" data-mode="menu">仅菜单(含做法)</button>
+        <button class="share-mode-tab" data-mode="list">仅购物清单</button>
+      </div>
+      <div class="share-preview" id="sharePreview"></div>
+      <div class="share-actions">
+        <button class="btn-secondary" id="shareCopy">复制文本</button>
+        <button class="btn-secondary" id="shareNative" hidden>系统分享</button>
+        <button class="btn-primary" id="shareImage">生成图片</button>
+      </div>
+      <div class="share-image-wrap" id="shareImageWrap" hidden>
+        <img id="shareImageEl" alt="菜单图片" />
+        <div class="share-image-hint">长按图片即可保存或分享给朋友</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
