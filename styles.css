@@ -436,6 +436,37 @@ main {
   flex: 1;
 }
 
+/* Emoji 选择器 */
+.emoji-picker {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.emoji-pick {
+  font-size: 22px;
+  background: #faf8fd;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 0;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.2;
+  transition: all 0.1s;
+  user-select: none;
+}
+
+.emoji-pick:active {
+  transform: scale(0.92);
+}
+
+.emoji-pick.active {
+  background: var(--selected);
+  border-color: var(--selected-border);
+  box-shadow: 0 0 0 1px var(--primary) inset;
+}
+
 /* 图片上传 */
 .image-uploader {
   display: flex;

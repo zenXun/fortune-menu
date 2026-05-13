@@ -7,6 +7,14 @@
   const MAX_IMAGE_DIM = 800;
   const IMAGE_QUALITY = 0.8;
 
+  const PRESET_EMOJIS = [
+    "🍅", "🥩", "🍖", "🍗", "🐔", "🐟", "🦐", "🦀",
+    "🥚", "🥬", "🥒", "🥕", "🥔", "🌽", "🥦", "🍆",
+    "🍄", "🌶️", "🧄", "🧅", "🍚", "🍜", "🍝", "🍲",
+    "🥘", "🍛", "🥟", "🍣", "🥗", "🍳", "🥞", "🍰",
+    "🍵", "🥤", "🍶", "🍞", "🥖", "🍕", "🍔", "🌭"
+  ];
+
   // 食材分组(按超市动线排序:肉类→海鲜→蛋奶豆→菌菇→蔬菜→葱姜蒜→水果→主食→干货→调料→其他)
   const INGREDIENT_GROUPS = [
     { name: "🥩 肉类", keywords: ["五花肉", "排骨", "里脊", "猪肉", "猪", "牛腩", "牛排", "牛肉", "牛", "羊肉", "羊", "鸡腿", "鸡翅", "鸡胸", "鸡爪", "鸡肉", "鸡", "鸭", "鹅", "培根", "香肠", "火腿", "腊肉", "肉馅", "肉丝", "肉片", "肉"] },
@@ -950,6 +958,26 @@
 
   $("#addIngredient").addEventListener("click", () => addIngredientRow());
 
+  // ---------- Emoji 选择器 ----------
+  function renderEmojiPicker() {
+    const picker = $("#emojiPicker");
+    picker.innerHTML = "";
+    const current = $("#recipeEmoji").value.trim();
+    PRESET_EMOJIS.forEach((e) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "emoji-pick" + (e === current ? " active" : "");
+      btn.textContent = e;
+      btn.addEventListener("click", () => {
+        $("#recipeEmoji").value = e;
+        renderEmojiPicker();
+      });
+      picker.appendChild(btn);
+    });
+  }
+
+  $("#recipeEmoji").addEventListener("input", renderEmojiPicker);
+
   // ---------- 图片上传 ----------
   function setPreviewImage(dataUrl) {
     pendingImage = dataUrl || "";
@@ -1021,6 +1049,7 @@
     $("#ingredientList").innerHTML = "";
     addIngredientRow();
     setPreviewImage("");
+    renderEmojiPicker();
     $("#cancelEdit").hidden = true;
     $("#saveRecipe").textContent = "保存菜谱";
   }
@@ -1039,6 +1068,7 @@
       recipe.ingredients.forEach((ing) => addIngredientRow(ing));
     }
     setPreviewImage(recipe.image || "");
+    renderEmojiPicker();
     $("#cancelEdit").hidden = false;
     $("#saveRecipe").textContent = "更新菜谱";
     switchTab("add");
@@ -1092,6 +1122,8 @@
     renderManageList();
     renderRecipes();
     updateCartBadge();
+    switchTab("menu");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   });
 
   function renderManageList() {
